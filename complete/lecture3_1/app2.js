@@ -14,15 +14,20 @@ class App{
         this.clock = new THREE.Clock();
 
 		this.camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
-		this.camera.position.set( 0, 1.6, 3 );
+		this.camera.position.set( 0, 2, 3 );
 
 		this.scene = new THREE.Scene();
+
         this.scene.background = new THREE.Color( 0x505050 );
 
 		this.scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
 
-        const light = new THREE.DirectionalLight( 0xffffff );
-        light.position.set( 1, 1, 1 ).normalize();
+        const light = new THREE.DirectionalLight( 0x505050 );
+
+light.getWorldPosition();
+        light.position.set( 1, 3, 0 ).normalize();
+
+
 		this.scene.add( light );
 
 		this.renderer = new THREE.WebGLRenderer({ antialias: true } );
@@ -53,30 +58,30 @@ class App{
     initScene(){
         this.normal = new THREE.Vector3();
         this.count = 0;
-        this.radius = 0.09;
+        this.radius = 0.1;
         this.relativeVelocity = new THREE.Vector3();
 
         this.room = new THREE.LineSegments(
-					new BoxLineGeometry( 7, 7, 7, 10, 10, 10 ),
-					new THREE.LineBasicMaterial( { color: 0x808080 } )
+					new BoxLineGeometry( 1, 1, 1, 1, 1, 1 ),
+					new THREE.LineBasicMaterial( { color: 0xFFFFFF } )
 				);
-        this.room.geometry.translate( 0, 3, 0 );
+        this.room.geometry.translate( Math.random(-1,1), Math.random(-1,1), 0 );
         this.scene.add( this.room );
 
-        const geometry = new THREE.BoxBufferGeometry( this.radius, 2 );
+        const geometry = new THREE.BoxBufferGeometry( Math.random(-.01 ,.01), Math.random(-.01 ,.01) );
 
         for ( let i = 0; i < 1000; i ++ ) {
 
-            const object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+            const object = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: Math.random(-255,255) * 0xffffff ,reflectivity:1  } ) );
 
-            object.position.x = this.random( -2, 2 );
-            object.position.y = this.random( -2, 2 );
-            object.position.z = this.random( -2, 2 );
+            object.position.x = this.random( -7, 7 );
+            object.position.y = this.random( -7, 7 );
+            object.position.z = this.random( -7, 7 );
 
             object.userData.velocity = new THREE.Vector3();
-            object.userData.velocity.x = this.random( -0.005,  0.005  );
-            object.userData.velocity.y = this.random( -0.005, 0.005 );
-            object.userData.velocity.z = this.random( -0.005, 0.005 );
+            object.userData.velocity.x = this.random( -0.001,  0.001  );
+            object.userData.velocity.y = this.random( -0.001, 0.001 );
+            object.userData.velocity.z = this.random( -0.001, 0.001 );
 
             this.room.add( object );
 
@@ -168,9 +173,9 @@ class App{
             case 'gaze':
 
                 geometry = new THREE.RingBufferGeometry( 0.02, 0.04, 32 ).translate( 0, 0, - 1 );
-                material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true } );
+                material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: false } );
                 return new THREE.Mesh( geometry, material );
-
+geometry.position.copy( -controller.position/PI*10 );
         }
 
     }
@@ -291,3 +296,4 @@ class App{
 }
 
 export { App };
+

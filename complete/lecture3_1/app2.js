@@ -10,12 +10,12 @@ class App{
 	constructor(){
 		const container = document.createElement( 'div' );
 		document.body.appendChild( container );
-        
+
         this.clock = new THREE.Clock();
-        
+
 		this.camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
 		this.camera.position.set( 0, 1.6, 3 );
-        
+
 		this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color( 0x505050 );
 
@@ -24,48 +24,48 @@ class App{
         const light = new THREE.DirectionalLight( 0xffffff );
         light.position.set( 1, 1, 1 ).normalize();
 		this.scene.add( light );
-			
+
 		this.renderer = new THREE.WebGLRenderer({ antialias: true } );
 		this.renderer.setPixelRatio( window.devicePixelRatio );
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
         this.renderer.outputEncoding = THREE.sRGBEncoding;
-        
+
 		container.appendChild( this.renderer.domElement );
-        
+
         this.controls = new OrbitControls( this.camera, this.renderer.domElement );
         this.controls.target.set(0, 1.6, 0);
         this.controls.update();
-        
+
         this.stats = new Stats();
-        
+
         this.initScene();
         this.setupVR();
-        
+
         window.addEventListener('resize', this.resize.bind(this) );
-        
+
         this.renderer.setAnimationLoop( this.render.bind(this) );
-	}	
-    
+	}
+
     random( min, max ){
         return Math.random() * (max-min) + min;
     }
-    
+
     initScene(){
         this.normal = new THREE.Vector3();
         this.count = 0;
-        this.radius = 0.08;
+        this.radius = 0.09;
         this.relativeVelocity = new THREE.Vector3();
-        
+
         this.room = new THREE.LineSegments(
-					new BoxLineGeometry( 6, 6, 6, 10, 10, 10 ),
+					new BoxLineGeometry( 7, 7, 7, 10, 10, 10 ),
 					new THREE.LineBasicMaterial( { color: 0x808080 } )
 				);
         this.room.geometry.translate( 0, 3, 0 );
         this.scene.add( this.room );
-        
-        const geometry = new THREE.IcosahedronBufferGeometry( this.radius, 2 );
 
-        for ( let i = 0; i < 200; i ++ ) {
+        const geometry = new THREE.BoxBufferGeometry( this.radius, 2 );
+
+        for ( let i = 0; i < 1000; i ++ ) {
 
             const object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
 
@@ -74,7 +74,7 @@ class App{
             object.position.z = this.random( -2, 2 );
 
             object.userData.velocity = new THREE.Vector3();
-            object.userData.velocity.x = this.random( -0.005, 0.005 );
+            object.userData.velocity.x = this.random( -0.005,  0.005  );
             object.userData.velocity.y = this.random( -0.005, 0.005 );
             object.userData.velocity.z = this.random( -0.005, 0.005 );
 
@@ -82,12 +82,12 @@ class App{
 
         }
     }
-    
+
     setupVR(){
         this.renderer.xr.enabled = true;
-        
+
         document.body.appendChild( VRButton.createButton( this.renderer ) );
-        
+
         function onSelectStart() {
 
             this.userData.isSelecting = true;
@@ -99,9 +99,9 @@ class App{
             this.userData.isSelecting = false;
 
         }
-        
+
         const self = this;
-        
+
         this.controller1 = this.renderer.xr.getController( 0 );
         this.controller1.addEventListener( 'selectstart', onSelectStart );
         this.controller1.addEventListener( 'selectend', onSelectEnd );
@@ -149,12 +149,12 @@ class App{
         this.controllerGrip2.add( controllerModelFactory.createControllerModel( this.controllerGrip2 ) );
         this.scene.add( this.controllerGrip2 );
     }
-    
+
     buildController( data ) {
         let geometry, material;
-        
+
         switch ( data.targetRayMode ) {
-            
+
             case 'tracked-pointer':
 
                 geometry = new THREE.BufferGeometry();
@@ -174,16 +174,27 @@ class App{
         }
 
     }
-    
+
     handleController( controller ) {
+
+			var object = this.room.children[ this.count ++ ];
+
+			object.position.copy( controller.position );
+			object.userData.velocity.x = this.random( -2,  2 );
+			object.userData.velocity.y = this.random( -2, 2 );
+			object.userData.velocity.z = this.random( -8, 1 );
+			object.userData.velocity.applyQuaternion( controller.quaternion   );
+
+			if ( this.count === this.room.children.length ) this.count = 0;
+
 
         if ( controller.userData.isSelecting ) {
 
             var object = this.room.children[ this.count ++ ];
 
             object.position.copy( controller.position );
-            object.userData.velocity.x = this.random( -1.5, 1.5 );
-            object.userData.velocity.y = this.random( -1.5, 1.5 );
+            object.userData.velocity.x = this.random( -2, 1.5 );
+            object.userData.velocity.y = this.random( -2, 2 );
             object.userData.velocity.z = this.random( -8, 1 );
             object.userData.velocity.applyQuaternion( controller.quaternion );
 
@@ -192,16 +203,16 @@ class App{
         }
 
     }
-    
+
     resize(){
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize( window.innerWidth, window.innerHeight );  
+        this.renderer.setSize( window.innerWidth, window.innerHeight );
     }
-    
-	render( ) {   
+
+	render( ) {
         this.stats.update();
-        
+
         this.handleController( this.controller1 );
         this.handleController( this.controller2 );
 
@@ -274,7 +285,7 @@ class App{
             object.userData.velocity.y -= 9.8 * delta;
 
         }
-        
+
         this.renderer.render( this.scene, this.camera );
     }
 }

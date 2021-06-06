@@ -2,7 +2,6 @@ import * as THREE from '../../libs/three/three.module.js';
 import { OrbitControls } from '../../libs/three/jsm/OrbitControls.js';
 import { Stats } from '../../libs/stats.module.js';
 import { ARButton } from '../../libs/ARButton.js';
-import { GLTFLoader } from '../../libs/three/jsm/GLTFLoader.js';
 
 class App{
 	constructor(){
@@ -27,50 +26,21 @@ class App{
         this.renderer.outputEncoding = THREE.sRGBEncoding;
 
 		container.appendChild( this.renderer.domElement );
-		this.loadGLTF();
 
-		loadGLTF(){
-				const loader = new GLTFLoader( ).setPath('https://cdn.glitch.com/a7bde607-48cf-44da-9dd9-d5b616b75906%2Fpeyote888888.glb?v=1616992492194');
-				const self = this;
+        this.controls = new OrbitControls( this.camera, this.renderer.domElement );
+        this.controls.target.set(0, 3.5, 0);
+        this.controls.update();
 
-		// Load a glTF resource
-		loader.load(
-			// resource URL
-			'peyote888888.glb',
-			// called when the resource is loaded
-			function ( gltf ) {
-								const bbox = new THREE.Box3().setFromObject( gltf.scene );
-								console.log(`min:${bbox.min.x.toFixed(2)},${bbox.min.y.toFixed(2)},${bbox.min.z.toFixed(2)} -  max:${bbox.max.x.toFixed(2)},${bbox.max.y.toFixed(2)},${bbox.max.z.toFixed(2)}`);
+        this.stats = new Stats();
 
-								gltf.scene.traverse( ( child ) => {
-										if (child.isMesh){
-												child.material.metalness = 0.2;
-										}
-								})
-								self.chair = gltf.scene;
+        this.initScene();
+        this.setupVR();
 
-				self.scene.add( gltf.scene );
+        window.addEventListener('resize', this.resize.bind(this) );
+	}
 
-
-
-				self.renderer.setAnimationLoop( self.render.bind(self));
-			},
-			// called while loading is progressing
-			function ( xhr ) {
-
-				self.loadingBar.progress = (xhr.loaded / xhr.total);
-
-			},
-			// called when loading has errors
-			function ( error ) {
-
-				console.log( 'An error happened' );
-
-			}
-				);
-		}
     initScene(){
-        this.chair = new THREE.BoxBufferGeometry( 0.06, 0.06, 0.06 );
+        this.geometry = new THREE.TorusKnotBufferGeometry( 0.06, 0.06, 0.06 ); 
         this.meshes = [];
     }
 
@@ -91,7 +61,6 @@ class App{
         }
 
         const btn = new ARButton( this.renderer );
-				this.loadGLTF();
 
         controller = this.renderer.xr.getController( 0 );
         controller.addEventListener( 'select', onSelect );
@@ -108,7 +77,6 @@ class App{
 
 	render( ) {
         this.stats.update();
-
         this.meshes.forEach( (mesh) => { mesh.rotateY( 0.01 ); });
         this.renderer.render( this.scene, this.camera );
     }

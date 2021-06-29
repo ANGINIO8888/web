@@ -14,7 +14,7 @@ class App{
         
         this.loadingBar = new LoadingBar();
 
-		this.assetsPath = '../../assets/';
+		this.assetsPath = 'https://cdn.glitch.com/a7bde607-48cf-44da-9dd9-d5b616b75906%2Fknight.glb?v=1624945694121';
         
 		this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 20 );
 		this.camera.position.set( 0, 1.6, 3 );
@@ -76,7 +76,7 @@ class App{
 		// Load a GLTF resource
 		loader.load(
 			// resource URL
-			`knight2.glb`,
+			`knight.glb`,
 			// called when the resource is loaded
 			function ( gltf ) {
 				const object = gltf.scene.children[5];

@@ -89,7 +89,7 @@ class App{
                     animations: gltf.animations,
 					clip: gltf.animations[0],
 					app: self,
-					name: 'Knight',
+					name: 'knight',
 					npc: false
 				};
 				
